@@ -1,3 +1,4 @@
+#error "CORNE OVERLAY LOADED"
 /*
  * Corne v4 – I2C SSD1306 OLED (nice!display adapter)
  * Verified for ZMK 2025/2026
