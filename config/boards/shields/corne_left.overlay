@@ -1,0 +1,25 @@
+THIS_WILL_FAIL;
+/ {
+    chosen {
+        zmk,display = &oled;
+    };
+};
+
+&i2c0 {
+    status = "okay";
+
+    oled: ssd1306@3c {
+        compatible = "solomon,ssd1306fb";
+        reg = <0x3c>;
+
+        width = <128>;
+        height = <32>; /* change to 64 if needed */
+
+        segment-offset = <0>;
+        page-offset = <0>;
+        display-offset = <0>;
+        multiplex-ratio = <31>;
+        prechargep = <2>;
+        com-invdir;
+    };
+};
