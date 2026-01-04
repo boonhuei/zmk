@@ -26,7 +26,7 @@ jobs:
           repository: zmkfirmware/zmk
           path: zmk-upstream
 
-      # 2️⃣ Checkout your config repo (fork with overlays, shields)
+      # 2️⃣ Checkout your config repo (fork with overlays/shields)
       - name: Checkout Config repo
         uses: actions/checkout@v3
         with:
@@ -91,7 +91,7 @@ jobs:
             -DSHIELD="corne_right nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
 
-      # 10️⃣ Verify Right UF2
+      # 🔟 Verify Right UF2
       - name: Check Right UF2
         working-directory: zmk-upstream
         run: |
@@ -103,14 +103,14 @@ jobs:
             exit 1
           fi
 
-      # 11️⃣ Upload Left UF2
+      # 1️⃣1️⃣ Upload Left UF2
       - name: Upload Left UF2
         uses: actions/upload-artifact@v4
         with:
           name: corne_left_with_studio
           path: zmk-upstream/build_left/zephyr/zmk.uf2
 
-      # 12️⃣ Upload Right UF2
+      # 1️⃣2️⃣ Upload Right UF2
       - name: Upload Right UF2
         uses: actions/upload-artifact@v4
         with:
