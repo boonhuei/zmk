@@ -33,25 +33,36 @@ jobs:
           repository: boonhuei/zmk  # <-- replace with your fork
           path: zmk-config
 
-      # 3️⃣ Setup Python
+      # 3️⃣ Debug: verify official repo
+      - name: List zmk-upstream contents
+        run: |
+          echo "Contents of zmk-upstream:"
+          ls -l zmk-upstream
+          if [ ! -f zmk-upstream/west.yml ]; then
+            echo "❌ west.yml missing! Checkout is wrong."
+            exit 1
+          fi
+          echo "✅ west.yml exists, proceeding."
+
+      # 4️⃣ Setup Python
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
-      # 4️⃣ Install dependencies
+      # 5️⃣ Install system dependencies
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y cmake ninja-build python3-pip git wget gcc-arm-none-eabi device-tree-compiler
 
-      # 5️⃣ Install west
+      # 6️⃣ Install west
       - name: Install west
         run: |
           pip install --upgrade pip
           pip install west
 
-      # 6️⃣ Initialize ZMK workspace inside official repo
+      # 7️⃣ Initialize ZMK workspace (inside official repo)
       - name: Initialize ZMK workspace
         working-directory: zmk-upstream
         run: |
@@ -59,7 +70,7 @@ jobs:
           west update
           west zephyr-export
 
-      # 7️⃣ Build Left Half
+      # 8️⃣ Build Left Half
       - name: Build Left Half
         working-directory: zmk-upstream
         run: |
@@ -69,7 +80,7 @@ jobs:
             -DSHIELD="corne_left nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
 
-      # 8️⃣ Check Left UF2
+      # 9️⃣ Verify Left UF2
       - name: Verify Left UF2
         working-directory: zmk-upstream
         run: |
@@ -80,7 +91,7 @@ jobs:
             exit 1
           fi
 
-      # 9️⃣ Build Right Half
+      # 🔟 Build Right Half
       - name: Build Right Half
         working-directory: zmk-upstream
         run: |
@@ -90,7 +101,7 @@ jobs:
             -DSHIELD="corne_right nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
 
-      # 🔟 Check Right UF2
+      # 1️⃣1️⃣ Verify Right UF2
       - name: Verify Right UF2
         working-directory: zmk-upstream
         run: |
@@ -101,14 +112,14 @@ jobs:
             exit 1
           fi
 
-      # 1️⃣1️⃣ Upload Left UF2
+      # 1️⃣2️⃣ Upload Left UF2
       - name: Upload Left UF2
         uses: actions/upload-artifact@v4
         with:
           name: corne_left_with_studio
           path: zmk-upstream/build_left/zephyr/zmk.uf2
 
-      # 1️⃣2️⃣ Upload Right UF2
+      # 1️⃣3️⃣ Upload Right UF2
       - name: Upload Right UF2
         uses: actions/upload-artifact@v4
         with:
