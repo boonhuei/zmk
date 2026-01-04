@@ -19,109 +19,137 @@ jobs:
         shell: bash
 
     steps:
-      # 1️⃣ Checkout official ZMK firmware (must have west.yml)
+      # 1️⃣ Checkout the official ZMK firmware repo (required for west.yml)
       - name: Checkout ZMK upstream
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
-          repository: zmkfirmware/zmk
+          repository: zmkfirmware/zmk   # Official repo!
           path: zmk-upstream
 
-      # 2️⃣ Checkout your fork/config (overlays/shields)
+      # 2️⃣ Checkout your fork/config repo (for overlays and configurations)
       - name: Checkout Config repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
-          repository: boonhuei/zmk  # <-- your fork
+          repository: boonhuei/zmk     # Your fork (change this if needed)
           path: zmk-config
 
-      # 3️⃣ Debug: verify west.yml exists
-      - name: Verify zmk-upstream contents
+      # 3️⃣ Verify the checkout and presence of west.yml
+      - name: Verify zmk-upstream contents and west.yml
         run: |
-          echo "Contents of zmk-upstream:"
+          echo "Checking out zmk-upstream directory"
           ls -l zmk-upstream
+          echo "Checking for west.yml"
           if [ ! -f zmk-upstream/west.yml ]; then
-            echo "❌ west.yml missing! Checkout is wrong."
+            echo "❌ west.yml missing! This means the repo was not checked out correctly."
             exit 1
           fi
-          echo "✅ west.yml exists, proceeding."
+          echo "✅ west.yml found in zmk-upstream. Proceeding with build."
 
-      # 4️⃣ Setup Python
+      # 4️⃣ Setup Python for building (actions/setup-python)
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
-
-      # 5️⃣ Install dependencies
-      - name: Install dependencies
+          
+      # 5️⃣ Install necessary dependencies (e.g., cmake, ninja, gcc, etc.)
+      - name: Install build dependencies
         run: |
+          echo "Updating system and installing required dependencies..."
           sudo apt update
           sudo apt install -y cmake ninja-build python3-pip git wget gcc-arm-none-eabi device-tree-compiler
 
-      # 6️⃣ Install west
-      - name: Install west
+      # 6️⃣ Install west (if it's not already installed)
+      - name: Install west (ZMK workspace manager)
         run: |
+          echo "Installing west..."
           pip install --upgrade pip
           pip install west
 
-      # 7️⃣ Initialize ZMK workspace
+      # 7️⃣ Initialize the ZMK workspace
       - name: Initialize ZMK workspace
         working-directory: zmk-upstream
         run: |
+          echo "Initializing west workspace..."
           west init -l .
           west update
           west zephyr-export
+          echo "Workspace initialized successfully."
 
-      # 8️⃣ Build Left Half
+      # 8️⃣ Debug: List ZMK workspace structure
+      - name: List ZMK workspace structure
+        working-directory: zmk-upstream
+        run: |
+          echo "Listing the workspace structure..."
+          ls -l
+          echo "Displaying the Zephyr folder contents..."
+          ls -l zephyr
+
+      # 9️⃣ Build Left Half (first half of the keyboard)
       - name: Build Left Half
         working-directory: zmk-upstream
         run: |
+          echo "Building Left Half..."
           rm -rf build_left
           west build -b nice_nano_v2 -s app -d build_left \
             -DZMK_CONFIG=../zmk-config \
             -DSHIELD="corne_left nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
+          echo "Left Half build completed."
 
-      # 9️⃣ Verify Left UF2
+      # 🔟 Verify Left UF2 file exists
       - name: Verify Left UF2
         working-directory: zmk-upstream
         run: |
+          echo "Checking if Left UF2 file exists..."
           if [ -f build_left/zephyr/zmk.uf2 ]; then
-            echo "✅ Left UF2 exists"
+            echo "✅ Left UF2 exists at build_left/zephyr/zmk.uf2"
           else
-            echo "❌ Left UF2 missing"
+            echo "❌ Left UF2 missing! Check the build logs."
             exit 1
           fi
 
-      # 🔟 Build Right Half
+      # 1️⃣1️⃣ Build Right Half (second half of the keyboard)
       - name: Build Right Half
         working-directory: zmk-upstream
         run: |
+          echo "Building Right Half..."
           rm -rf build_right
           west build -b nice_nano_v2 -s app -d build_right \
             -DZMK_CONFIG=../zmk-config \
             -DSHIELD="corne_right nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
+          echo "Right Half build completed."
 
-      # 1️⃣1️⃣ Verify Right UF2
+      # 1️⃣2️⃣ Verify Right UF2 file exists
       - name: Verify Right UF2
         working-directory: zmk-upstream
         run: |
+          echo "Checking if Right UF2 file exists..."
           if [ -f build_right/zephyr/zmk.uf2 ]; then
-            echo "✅ Right UF2 exists"
+            echo "✅ Right UF2 exists at build_right/zephyr/zmk.uf2"
           else
-            echo "❌ Right UF2 missing"
+            echo "❌ Right UF2 missing! Check the build logs."
             exit 1
           fi
 
-      # 1️⃣2️⃣ Upload Left UF2
+      # 1️⃣3️⃣ Upload Left UF2 artifact
       - name: Upload Left UF2
         uses: actions/upload-artifact@v4
         with:
           name: corne_left_with_studio
           path: zmk-upstream/build_left/zephyr/zmk.uf2
 
-      # 1️⃣3️⃣ Upload Right UF2
+      # 1️⃣4️⃣ Upload Right UF2 artifact
       - name: Upload Right UF2
         uses: actions/upload-artifact@v4
         with:
           name: corne_right_with_studio
           path: zmk-upstream/build_right/zephyr/zmk.uf2
+
+      # 1️⃣5️⃣ Final debug: Show content of uploaded files
+      - name: Debug: Show contents of uploaded artifacts
+        run: |
+          echo "Listing contents of the uploaded files:"
+          ls -l zmk-upstream/build_left/zephyr
+          ls -l zmk-upstream/build_right/zephyr
+          echo "Artifacts are ready to be uploaded as UF2 files."
