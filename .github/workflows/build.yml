@@ -24,14 +24,14 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: zmkfirmware/zmk
-          path: zmk
+          path: zmk-upstream
 
       # 2️⃣ Checkout your config repo (fork with shields)
       - name: Checkout Config repo
         uses: actions/checkout@v3
         with:
-          repository: boonhuei/zmk    # <-- Replace with your config fork
-          path: config
+          repository: boonhuei/zmk   # <-- Replace with your repo
+          path: zmk-config
 
       # 3️⃣ Setup Python
       - name: Set up Python
@@ -49,46 +49,3 @@ jobs:
       - name: Install west
         run: |
           pip install --upgrade pip
-          pip install west
-
-      # 6️⃣ Initialize ZMK workspace in the correct folder
-      - name: Initialize ZMK workspace
-        working-directory: zmk
-        run: |
-          west init -l .
-          west update
-          west zephyr-export
-
-      # 7️⃣ Build Left Half
-      - name: Build Left Half
-        working-directory: zmk
-        run: |
-          rm -rf build_left
-          west build -b nice_nano_v2 -s app -d build_left \
-            -DZMK_CONFIG=../config \
-            -DSHIELD="corne_left nice_view" \
-            -DSNIPPET=studio-rpc-usb-uart
-
-      # 8️⃣ Build Right Half
-      - name: Build Right Half
-        working-directory: zmk
-        run: |
-          rm -rf build_right
-          west build -b nice_nano_v2 -s app -d build_right \
-            -DZMK_CONFIG=../config \
-            -DSHIELD="corne_right nice_view" \
-            -DSNIPPET=studio-rpc-usb-uart
-
-      # 9️⃣ Upload Left UF2
-      - name: Upload Left UF2
-        uses: actions/upload-artifact@v4
-        with:
-          name: corne_left_with_studio
-          path: build_left/zephyr/zmk.uf2
-
-      # 🔟 Upload Right UF2
-      - name: Upload Right UF2
-        uses: actions/upload-artifact@v4
-        with:
-          name: corne_right_with_studio
-          path: build_right/zephyr/zmk.uf2
