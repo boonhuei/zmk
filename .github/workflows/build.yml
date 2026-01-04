@@ -14,62 +14,80 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
 
     steps:
-      # 1. Checkout repo
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # 1️⃣ Checkout ZMK workspace
+      - name: Checkout ZMK firmware
+        uses: actions/checkout@v3
+        with:
+          repository: zmkfirmware/zmk
+          path: zmk
 
-      # 2. Set up Python (needed for west)
+      # 2️⃣ Checkout custom config repo (shields, .conf)
+      - name: Checkout Config repo
+        uses: actions/checkout@v3
+        with:
+          repository: <YOUR_CONFIG_REPO>  # Replace with your GitHub repo
+          path: config
+
+      # 3️⃣ Set up Python (needed for west)
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
-      # 3. Install dependencies
+      # 4️⃣ Install dependencies
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y cmake ninja-build python3-pip git wget gcc-arm-none-eabi device-tree-compiler
 
-      # 4. Install west
+      # 5️⃣ Install west
       - name: Install west
         run: |
           pip install --upgrade pip
           pip install west
 
-      # 5. Initialize ZMK workspace
+      # 6️⃣ Initialize ZMK workspace
       - name: Initialize ZMK
+        working-directory: zmk
         run: |
           west init -l .
           west update
           west zephyr-export
 
-      # 6. Clean build
-      - name: Clean build left
+      # 7️⃣ Clean build left half
+      - name: Build Left Half
+        working-directory: zmk
         run: |
           rm -rf build_left
-          west build -b nice_nano_v2 -s zmk/app -d build_left \
-            -DZMK_CONFIG=config \
+          west build -b nice_nano_v2 -s app -d build_left \
+            -DZMK_CONFIG=../config \
             -DSHIELD="corne_left nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
 
-      - name: Clean build right
+      # 8️⃣ Clean build right half
+      - name: Build Right Half
+        working-directory: zmk
         run: |
           rm -rf build_right
-          west build -b nice_nano_v2 -s zmk/app -d build_right \
-            -DZMK_CONFIG=config \
+          west build -b nice_nano_v2 -s app -d build_right \
+            -DZMK_CONFIG=../config \
             -DSHIELD="corne_right nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
 
-      # 7. Upload artifacts
-      - name: Upload left UF2
+      # 9️⃣ Upload left UF2 artifact
+      - name: Upload Left UF2
         uses: actions/upload-artifact@v4
         with:
           name: corne_left_with_studio
           path: build_left/zephyr/zmk.uf2
 
-      - name: Upload right UF2
+      # 🔟 Upload right UF2 artifact
+      - name: Upload Right UF2
         uses: actions/upload-artifact@v4
         with:
           name: corne_right_with_studio
