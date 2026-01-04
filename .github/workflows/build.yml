@@ -19,21 +19,21 @@ jobs:
         shell: bash
 
     steps:
-      # 1️⃣ Checkout ZMK workspace
+      # 1️⃣ Checkout ZMK upstream repo (contains west.yml)
       - name: Checkout ZMK firmware
         uses: actions/checkout@v3
         with:
           repository: zmkfirmware/zmk
           path: zmk
 
-      # 2️⃣ Checkout custom config repo (shields, .conf)
+      # 2️⃣ Checkout your config repo (fork with shields)
       - name: Checkout Config repo
         uses: actions/checkout@v3
         with:
-          repository: boonhuei/zmk  # Replace with your GitHub repo
+          repository: boonhuei/zmk    # <-- Replace with your config fork
           path: config
 
-      # 3️⃣ Set up Python (needed for west)
+      # 3️⃣ Setup Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -51,15 +51,15 @@ jobs:
           pip install --upgrade pip
           pip install west
 
-      # 6️⃣ Initialize ZMK workspace
-      - name: Initialize ZMK
+      # 6️⃣ Initialize ZMK workspace in the correct folder
+      - name: Initialize ZMK workspace
         working-directory: zmk
         run: |
           west init -l .
           west update
           west zephyr-export
 
-      # 7️⃣ Clean build left half
+      # 7️⃣ Build Left Half
       - name: Build Left Half
         working-directory: zmk
         run: |
@@ -69,7 +69,7 @@ jobs:
             -DSHIELD="corne_left nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
 
-      # 8️⃣ Clean build right half
+      # 8️⃣ Build Right Half
       - name: Build Right Half
         working-directory: zmk
         run: |
@@ -79,14 +79,14 @@ jobs:
             -DSHIELD="corne_right nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
 
-      # 9️⃣ Upload left UF2 artifact
+      # 9️⃣ Upload Left UF2
       - name: Upload Left UF2
         uses: actions/upload-artifact@v4
         with:
           name: corne_left_with_studio
           path: build_left/zephyr/zmk.uf2
 
-      # 🔟 Upload right UF2 artifact
+      # 🔟 Upload Right UF2
       - name: Upload Right UF2
         uses: actions/upload-artifact@v4
         with:
