@@ -74,10 +74,10 @@ jobs:
         working-directory: zmk-upstream
         run: |
           if [ -f build_left/zephyr/zmk.uf2 ]; then
-            echo "✅ Left UF2 exists"
+            echo "Left UF2 exists"
             ls -l build_left/zephyr/zmk.uf2
           else
-            echo "❌ Left UF2 MISSING"
+            echo "Left UF2 MISSING"
             exit 1
           fi
 
@@ -96,10 +96,10 @@ jobs:
         working-directory: zmk-upstream
         run: |
           if [ -f build_right/zephyr/zmk.uf2 ]; then
-            echo "✅ Right UF2 exists"
+            echo "Right UF2 exists"
             ls -l build_right/zephyr/zmk.uf2
           else
-            echo "❌ Right UF2 MISSING"
+            echo "Right UF2 MISSING"
             exit 1
           fi
 
