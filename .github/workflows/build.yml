@@ -19,7 +19,7 @@ jobs:
         shell: bash
 
     steps:
-      # 1️⃣ Checkout official ZMK firmware (contains west.yml)
+      # 1️⃣ Checkout official ZMK firmware (must have west.yml)
       - name: Checkout ZMK upstream
         uses: actions/checkout@v3
         with:
@@ -33,8 +33,8 @@ jobs:
           repository: boonhuei/zmk  # <-- replace with your fork
           path: zmk-config
 
-      # 3️⃣ Debug: verify official repo
-      - name: List zmk-upstream contents
+      # 3️⃣ Debug: verify west.yml exists
+      - name: Verify zmk-upstream contents
         run: |
           echo "Contents of zmk-upstream:"
           ls -l zmk-upstream
@@ -50,7 +50,7 @@ jobs:
         with:
           python-version: 3.11
 
-      # 5️⃣ Install system dependencies
+      # 5️⃣ Install dependencies
       - name: Install dependencies
         run: |
           sudo apt update
