@@ -26,20 +26,20 @@ jobs:
           repository: zmkfirmware/zmk
           path: zmk-upstream
 
-      # 2️⃣ Checkout your fork/config (overlays, shields)
+      # 2️⃣ Checkout your fork/config (overlays/shields)
       - name: Checkout Config repo
         uses: actions/checkout@v3
         with:
-          repository: boonhuei/zmk   # <-- replace with your fork
+          repository: boonhuei/zmk  # <-- replace with your fork
           path: zmk-config
 
-      # 3️⃣ Set up Python
+      # 3️⃣ Setup Python
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
-      # 4️⃣ Install system dependencies
+      # 4️⃣ Install dependencies
       - name: Install dependencies
         run: |
           sudo apt update
@@ -51,7 +51,7 @@ jobs:
           pip install --upgrade pip
           pip install west
 
-      # 6️⃣ Initialize ZMK workspace (inside official repo)
+      # 6️⃣ Initialize ZMK workspace inside official repo
       - name: Initialize ZMK workspace
         working-directory: zmk-upstream
         run: |
@@ -69,15 +69,14 @@ jobs:
             -DSHIELD="corne_left nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
 
-      # 8️⃣ Verify Left UF2
-      - name: Check Left UF2
+      # 8️⃣ Check Left UF2
+      - name: Verify Left UF2
         working-directory: zmk-upstream
         run: |
           if [ -f build_left/zephyr/zmk.uf2 ]; then
             echo "✅ Left UF2 exists"
-            ls -l build_left/zephyr/zmk.uf2
           else
-            echo "❌ Left UF2 MISSING"
+            echo "❌ Left UF2 missing"
             exit 1
           fi
 
@@ -91,15 +90,14 @@ jobs:
             -DSHIELD="corne_right nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
 
-      # 🔟 Verify Right UF2
-      - name: Check Right UF2
+      # 🔟 Check Right UF2
+      - name: Verify Right UF2
         working-directory: zmk-upstream
         run: |
           if [ -f build_right/zephyr/zmk.uf2 ]; then
             echo "✅ Right UF2 exists"
-            ls -l build_right/zephyr/zmk.uf2
           else
-            echo "❌ Right UF2 MISSING"
+            echo "❌ Right UF2 missing"
             exit 1
           fi
 
