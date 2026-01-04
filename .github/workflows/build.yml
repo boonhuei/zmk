@@ -26,11 +26,11 @@ jobs:
           repository: zmkfirmware/zmk
           path: zmk-upstream
 
-      # 2️⃣ Checkout your config repo (fork with shields)
+      # 2️⃣ Checkout your config repo
       - name: Checkout Config repo
         uses: actions/checkout@v3
         with:
-          repository: boonhuei/zmk   # <-- Replace with your repo
+          repository: boonhuei/zmk   # <-- replace with your fork
           path: zmk-config
 
       # 3️⃣ Setup Python
@@ -69,15 +69,15 @@ jobs:
             -DSHIELD="corne_left nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
 
-      # 8️⃣ Debug Left UF2
+      # 8️⃣ Check Left UF2
       - name: Check Left UF2
         working-directory: zmk-upstream
         run: |
           if [ -f build_left/zephyr/zmk.uf2 ]; then
-            echo "Left UF2 exists"
+            echo "✅ Left UF2 exists"
             ls -l build_left/zephyr/zmk.uf2
           else
-            echo "Left UF2 MISSING"
+            echo "❌ Left UF2 MISSING"
             exit 1
           fi
 
@@ -91,25 +91,28 @@ jobs:
             -DSHIELD="corne_right nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
 
-      # 🔟 Debug Right UF2
+      # 10️⃣ Check Right UF2
       - name: Check Right UF2
         working-directory: zmk-upstream
         run: |
           if [ -f build_right/zephyr/zmk.uf2 ]; then
-            echo "Right UF2 exists"
+            echo "✅ Right UF2 exists"
             ls -l build_right/zephyr/zmk.uf2
           else
-            echo "Right UF2 MISSING"
+            echo "❌ Right UF2 MISSING"
             exit 1
           fi
 
-      # 1️⃣1️⃣ Upload Left UF2
+      # 11️⃣ Upload Left UF2
       - name: Upload Left UF2
-        if: success() && always()
         uses: actions/upload-artifact@v4
         with:
           name: corne_left_with_studio
           path: zmk-upstream/build_left/zephyr/zmk.uf2
 
-      # 1️⃣2️⃣ Upload Right UF2
+      # 12️⃣ Upload Right UF2
       - name: Upload Right UF2
+        uses: actions/upload-artifact@v4
+        with:
+          name: corne_right_with_studio
+          path: zmk-upstream/build_right/zephyr/zmk.uf2
