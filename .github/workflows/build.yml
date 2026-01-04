@@ -19,14 +19,14 @@ jobs:
         shell: bash
 
     steps:
-      # 1️⃣ Checkout ZMK upstream repo (contains west.yml)
+      # 1️⃣ Checkout official ZMK firmware repo (contains west.yml)
       - name: Checkout ZMK upstream
         uses: actions/checkout@v3
         with:
           repository: zmkfirmware/zmk
           path: zmk-upstream
 
-      # 2️⃣ Checkout your config repo (fork with shields)
+      # 2️⃣ Checkout your config repo (fork with overlays, shields)
       - name: Checkout Config repo
         uses: actions/checkout@v3
         with:
@@ -51,7 +51,7 @@ jobs:
           pip install --upgrade pip
           pip install west
 
-      # 6️⃣ Initialize ZMK workspace
+      # 6️⃣ Initialize ZMK workspace (must run inside official ZMK repo)
       - name: Initialize ZMK workspace
         working-directory: zmk-upstream
         run: |
