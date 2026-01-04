@@ -1,0 +1,5 @@
+config SHIELD_NICE_VIEW
+    bool "nice!view display"
+    depends on BOARD_NICE_NANO || BOARD_NICE_NANO_V2
+    select ZMK_DISPLAY
+    select SPI
