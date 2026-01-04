@@ -147,7 +147,7 @@ jobs:
           path: zmk-upstream/build_right/zephyr/zmk.uf2
 
       # 1️⃣5️⃣ Final debug: Show content of uploaded files
-      - name: Debug: Show contents of uploaded artifacts
+      - name: Show contents of uploaded artifacts
         run: |
           echo "Listing contents of the uploaded files:"
           ls -l zmk-upstream/build_left/zephyr
