@@ -4,7 +4,7 @@
 #jobs:
 #  build:
 #    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3
-name: Build ZMK Firmware
+name: Build Corne v4 Firmware
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
         shell: bash
 
     steps:
-      # 1️⃣ Checkout official ZMK firmware repo (contains west.yml)
+      # 1️⃣ Checkout official ZMK repo (contains west.yml)
       - name: Checkout ZMK upstream
         uses: actions/checkout@v3
         with:
@@ -30,7 +30,7 @@ jobs:
       - name: Checkout Config repo
         uses: actions/checkout@v3
         with:
-          repository: boonhuei/zmk   # <-- Replace with your repo
+          repository: boonhuei/zmk   # <-- replace with your fork
           path: zmk-config
 
       # 3️⃣ Setup Python
@@ -51,7 +51,7 @@ jobs:
           pip install --upgrade pip
           pip install west
 
-      # 6️⃣ Initialize ZMK workspace (must run inside official ZMK repo)
+      # 6️⃣ Initialize ZMK workspace (inside official repo)
       - name: Initialize ZMK workspace
         working-directory: zmk-upstream
         run: |
@@ -69,7 +69,7 @@ jobs:
             -DSHIELD="corne_left nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
 
-      # 8️⃣ Check Left UF2
+      # 8️⃣ Verify Left UF2
       - name: Check Left UF2
         working-directory: zmk-upstream
         run: |
@@ -91,7 +91,7 @@ jobs:
             -DSHIELD="corne_right nice_view" \
             -DSNIPPET=studio-rpc-usb-uart
 
-      # 10️⃣ Check Right UF2
+      # 10️⃣ Verify Right UF2
       - name: Check Right UF2
         working-directory: zmk-upstream
         run: |
