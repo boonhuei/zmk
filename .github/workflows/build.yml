@@ -30,7 +30,7 @@ jobs:
       - name: Checkout Config repo
         uses: actions/checkout@v3
         with:
-          repository: boonhuei/zmk  # <-- replace with your fork
+          repository: boonhuei/zmk  # <-- your fork
           path: zmk-config
 
       # 3️⃣ Debug: verify west.yml exists
@@ -62,7 +62,7 @@ jobs:
           pip install --upgrade pip
           pip install west
 
-      # 7️⃣ Initialize ZMK workspace (inside official repo)
+      # 7️⃣ Initialize ZMK workspace
       - name: Initialize ZMK workspace
         working-directory: zmk-upstream
         run: |
