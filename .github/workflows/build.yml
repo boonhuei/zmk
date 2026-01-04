@@ -27,7 +27,7 @@ jobs:
           path: zmk-upstream            # Place it in zmk-upstream directory
 
       # 2️⃣ Debugging: List contents of zmk-upstream to verify repo structure
-      - name: Debugging: Check for west.yml and List zmk-upstream contents
+      - name: Check for west.yml and List zmk-upstream contents
         run: |
           echo "Listing contents of zmk-upstream folder:"
           ls -l zmk-upstream
