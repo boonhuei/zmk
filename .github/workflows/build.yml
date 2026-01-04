@@ -1,6 +1,76 @@
-name: Build ZMK firmware
-on: [push, pull_request, workflow_dispatch]
+#name: Build ZMK firmware
+#on: [push, pull_request, workflow_dispatch]
+
+#jobs:
+#  build:
+#    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3
+name: Build ZMK Firmware
+
+on:
+  push:
+    branches: [main]
+  pull_request:
 
 jobs:
   build:
-    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Set up Python (needed for west)
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cmake ninja-build python3-pip git wget gcc-arm-none-eabi device-tree-compiler
+
+      # 4. Install west
+      - name: Install west
+        run: |
+          pip install --upgrade pip
+          pip install west
+
+      # 5. Initialize ZMK workspace
+      - name: Initialize ZMK
+        run: |
+          west init -l .
+          west update
+          west zephyr-export
+
+      # 6. Clean build
+      - name: Clean build left
+        run: |
+          rm -rf build_left
+          west build -b nice_nano_v2 -s zmk/app -d build_left \
+            -DZMK_CONFIG=config \
+            -DSHIELD="corne_left nice_view" \
+            -DSNIPPET=studio-rpc-usb-uart
+
+      - name: Clean build right
+        run: |
+          rm -rf build_right
+          west build -b nice_nano_v2 -s zmk/app -d build_right \
+            -DZMK_CONFIG=config \
+            -DSHIELD="corne_right nice_view" \
+            -DSNIPPET=studio-rpc-usb-uart
+
+      # 7. Upload artifacts
+      - name: Upload left UF2
+        uses: actions/upload-artifact@v3
+        with:
+          name: corne_left_with_studio
+          path: build_left/zephyr/zmk.uf2
+
+      - name: Upload right UF2
+        uses: actions/upload-artifact@v3
+        with:
+          name: corne_right_with_studio
+          path: build_right/zephyr/zmk.uf2
