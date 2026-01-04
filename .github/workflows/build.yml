@@ -8,7 +8,7 @@ name: Build Corne v4 Firmware
 
 on:
   push:
-    branches: [main]
+    branches: [main]  # Trigger for the main branch, adjust as needed
   pull_request:
 
 jobs:
@@ -19,53 +19,53 @@ jobs:
         shell: bash
 
     steps:
-      # 1️⃣ Checkout the official ZMK firmware repo (required for west.yml)
-      - name: Checkout ZMK upstream
+      # 1️⃣ Checkout the official ZMK firmware repo
+      - name: Checkout ZMK upstream (Official Repo)
         uses: actions/checkout@v3
         with:
-          repository: zmkfirmware/zmk   # Official repo!
-          path: zmk-upstream
+          repository: zmkfirmware/zmk   # The official ZMK repo
+          path: zmk-upstream            # Place it in zmk-upstream directory
 
-      # 2️⃣ Checkout your fork/config repo (for overlays and configurations)
-      - name: Checkout Config repo
-        uses: actions/checkout@v3
-        with:
-          repository: boonhuei/zmk     # Your fork (change this if needed)
-          path: zmk-config
-
-      # 3️⃣ Verify the checkout and presence of west.yml
-      - name: Verify zmk-upstream contents and west.yml
+      # 2️⃣ Debugging: List contents of zmk-upstream to verify repo structure
+      - name: Debugging: Check for west.yml and List zmk-upstream contents
         run: |
-          echo "Checking out zmk-upstream directory"
+          echo "Listing contents of zmk-upstream folder:"
           ls -l zmk-upstream
-          echo "Checking for west.yml"
+          echo "Checking for west.yml in zmk-upstream:"
           if [ ! -f zmk-upstream/west.yml ]; then
-            echo "❌ west.yml missing! This means the repo was not checked out correctly."
+            echo "❌ west.yml missing! The repository was not checked out correctly."
             exit 1
           fi
           echo "✅ west.yml found in zmk-upstream. Proceeding with build."
 
-      # 4️⃣ Setup Python for building (actions/setup-python)
+      # 3️⃣ Checkout your custom ZMK config repo for overlays
+      - name: Checkout Config repo (Your Custom Configuration)
+        uses: actions/checkout@v3
+        with:
+          repository: boonhuei/zmk      # Your forked repo for custom overlays
+          path: zmk-config             # Place in zmk-config directory
+
+      # 4️⃣ Setup Python 3 for the build process (ZMK requires Python)
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
-          
-      # 5️⃣ Install necessary dependencies (e.g., cmake, ninja, gcc, etc.)
+
+      # 5️⃣ Install build dependencies
       - name: Install build dependencies
         run: |
           echo "Updating system and installing required dependencies..."
           sudo apt update
           sudo apt install -y cmake ninja-build python3-pip git wget gcc-arm-none-eabi device-tree-compiler
 
-      # 6️⃣ Install west (if it's not already installed)
+      # 6️⃣ Install West (ZMK's workspace manager)
       - name: Install west (ZMK workspace manager)
         run: |
           echo "Installing west..."
           pip install --upgrade pip
           pip install west
 
-      # 7️⃣ Initialize the ZMK workspace
+      # 7️⃣ Initialize the ZMK workspace using west
       - name: Initialize ZMK workspace
         working-directory: zmk-upstream
         run: |
@@ -75,7 +75,7 @@ jobs:
           west zephyr-export
           echo "Workspace initialized successfully."
 
-      # 8️⃣ Debug: List ZMK workspace structure
+      # 8️⃣ Debug: List ZMK workspace structure to verify files
       - name: List ZMK workspace structure
         working-directory: zmk-upstream
         run: |
@@ -84,8 +84,8 @@ jobs:
           echo "Displaying the Zephyr folder contents..."
           ls -l zephyr
 
-      # 9️⃣ Build Left Half (first half of the keyboard)
-      - name: Build Left Half
+      # 9️⃣ Build Left Half (corne_left) firmware
+      - name: Build Left Half (corne_left)
         working-directory: zmk-upstream
         run: |
           echo "Building Left Half..."
@@ -96,8 +96,8 @@ jobs:
             -DSNIPPET=studio-rpc-usb-uart
           echo "Left Half build completed."
 
-      # 🔟 Verify Left UF2 file exists
-      - name: Verify Left UF2
+      # 🔟 Verify Left UF2 exists and is built successfully
+      - name: Verify Left UF2 File
         working-directory: zmk-upstream
         run: |
           echo "Checking if Left UF2 file exists..."
@@ -108,8 +108,8 @@ jobs:
             exit 1
           fi
 
-      # 1️⃣1️⃣ Build Right Half (second half of the keyboard)
-      - name: Build Right Half
+      # 1️⃣1️⃣ Build Right Half (corne_right) firmware
+      - name: Build Right Half (corne_right)
         working-directory: zmk-upstream
         run: |
           echo "Building Right Half..."
@@ -120,8 +120,8 @@ jobs:
             -DSNIPPET=studio-rpc-usb-uart
           echo "Right Half build completed."
 
-      # 1️⃣2️⃣ Verify Right UF2 file exists
-      - name: Verify Right UF2
+      # 1️⃣2️⃣ Verify Right UF2 exists and is built successfully
+      - name: Verify Right UF2 File
         working-directory: zmk-upstream
         run: |
           echo "Checking if Right UF2 file exists..."
@@ -132,22 +132,22 @@ jobs:
             exit 1
           fi
 
-      # 1️⃣3️⃣ Upload Left UF2 artifact
-      - name: Upload Left UF2
+      # 1️⃣3️⃣ Upload Left UF2 as artifact
+      - name: Upload Left UF2 artifact
         uses: actions/upload-artifact@v4
         with:
           name: corne_left_with_studio
           path: zmk-upstream/build_left/zephyr/zmk.uf2
 
-      # 1️⃣4️⃣ Upload Right UF2 artifact
-      - name: Upload Right UF2
+      # 1️⃣4️⃣ Upload Right UF2 as artifact
+      - name: Upload Right UF2 artifact
         uses: actions/upload-artifact@v4
         with:
           name: corne_right_with_studio
           path: zmk-upstream/build_right/zephyr/zmk.uf2
 
       # 1️⃣5️⃣ Final debug: Show content of uploaded files
-      - name: Show contents of uploaded artifacts
+      - name: Debug: Show contents of uploaded artifacts
         run: |
           echo "Listing contents of the uploaded files:"
           ls -l zmk-upstream/build_left/zephyr
