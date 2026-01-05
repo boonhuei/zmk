@@ -4,14 +4,14 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3
-    include:
+    with:
+      build_matrix: |
        - board: nice_nano@2
          shield: crkbd_left
          snippet: studio-rpc-usb-uart
-    #     cmake-args: -DCONFIG_ZMK_STUDIO=y
          artifact-name: corne_left_with_studio
        - board: nice_nano@2
          shield: crkbd_right
          snippet: studio-rpc-usb-uart
-    #     cmake-args: -DCONFIG_ZMK_STUDIO=y
          artifact-name: corne_right_with_studio
+#     cmake-args: -DCONFIG_ZMK_STUDIO=y
